@@ -5,7 +5,7 @@ Tags: commerce, e-commerce, commerce, WordPress ecommerce, store, sales, sell, s
 Requires at least: 6.0
 Tested up to: 6.4.2
 Requires PHP: 7.1
-Stable tag: 2.0.4
+Stable tag: 3.0.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,7 +53,7 @@ Colombia
 * Updated readme version WordPress
 = 2.0.3 =
 * Updated readme version WordPress
-= 2.0.4 =
+= 3.0.0 =
 * Fixed validate and confirmation transaction
 * Updated compatibility with version 6.4
 

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Payment Integration Wompi
 Description: Integration of Wompi for Woocommerce
-Version: 2.0.4
+Version: 3.0.0
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if(!defined('WOO_WOMPI_PAYMENT_WWP_VERSION')){
-    define('WOO_WOMPI_PAYMENT_WWP_VERSION', '2.0.4');
+    define('WOO_WOMPI_PAYMENT_WWP_VERSION', '3.0.0');
 }
 
 add_action('plugins_loaded','woo_wompi_payment_wwp_init');
