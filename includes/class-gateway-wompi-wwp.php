@@ -1,8 +1,15 @@
 <?php
-
-
 class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
 {
+    public $debug;
+
+    public $isTest;
+
+    public $public_key;
+
+    public $events_key;
+
+
     public function __construct()
     {
         $this->id = 'wompi_wwp';
@@ -20,8 +27,10 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
 
         if ($this->isTest){
             $this->public_key = $this->get_option( 'sandbox_public_key' );
+            $this->events_key = $this->get_option( 'sandbox_events_key' );
         }else{
             $this->public_key = $this->get_option( 'public_key' );
+            $this->events_key = $this->get_option( 'events_key' );
         }
 
         $this->init();
@@ -32,7 +41,8 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
     public function is_available()
     {
         return parent::is_available() &&
-            !empty($this->public_key);
+            !empty($this->public_key) &&
+            !empty($this->events_key);
     }
 
     public function init()
@@ -67,11 +77,15 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
 
         $params = [
             'public-key' => $this->public_key,
-            'currency' => 'COP',
+            'currency' => $order->get_currency(),
             'amount-in-cents' => bcmul($order->get_total(), 100),
             'reference' => $order_id,
             'redirect-url' => $order->get_checkout_order_received_url()
         ];
+
+        if ($this->debug === 'yes'){
+            woo_wompi_payment_wwp()->log($params);
+        }
 
         $url = $end_point . "?" . http_build_query($params);
 
@@ -84,24 +98,33 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
     public function confirmation_ipn()
     {
         $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
 
-        $params = json_decode($json, true);
+        woo_wompi_payment_wwp()->log('confirmation_ipn: ' . print_r($data, true));
 
-        woo_wompi_payment_wwp()->log($params);
-
-        if (!isset($params['data']['transaction']['reference']) ||
-            !isset($params['data']['transaction']['status']))
+        if (!isset($data['data']['transaction']['reference']) ||
+            !isset($data['data']['transaction']['id']) ||
+            !isset($data['data']['transaction']['status']) ||
+            !isset($data['data']['transaction']['amount_in_cents']) ||
+            !isset($data['signature']['checksum']) ||
+            !isset($data['timestamp']))
             return;
 
-        $order_id = $params['data']['transaction']['reference'];
+        $signature = "{$data['data']['transaction']['id']}{$data['data']['transaction']['status']}{$data['data']['transaction']['amount_in_cents']}";
+        $signature .= $data['timestamp'];
+        $signature .= $this->events_key;
+
+        $checksum = hash( 'sha256', $signature);
+
+        if($data['signature']['checksum'] !== $checksum) return;
+
+        $order_id = $data['data']['transaction']['reference'];
         $order = new WC_Order($order_id);
-        $status = $params['data']['transaction']['status'];
+        $status = $data['data']['transaction']['status'];
 
         if ($status === 'APPROVED')
             $order->payment_complete();
         if ($status === 'VOIDED' || $status === 'DECLINED' || $status === 'ERROR')
             $order->update_status('failed');
-
-        header("HTTP/1.1 200 OK");
     }
 }

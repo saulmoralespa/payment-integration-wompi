@@ -1,6 +1,4 @@
 <?php
-
-
 class Woo_Wompi_Payment
 {
     /**
@@ -40,12 +38,6 @@ class Woo_Wompi_Payment
      */
     public $includes_path;
     /**
-     * Absolute path to plugin lib dir
-     *
-     * @var string
-     */
-    public $lib_path;
-    /**
      * @var bool
      */
     private $_bootstrapped = false;
@@ -66,7 +58,7 @@ class Woo_Wompi_Payment
     {
         try{
             if ($this->_bootstrapped){
-                throw new Exception( 'Addi Woocommerce Credit can only be called once');
+                throw new Exception( 'Payment Integration Wompi can only be called once');
             }
             $this->_run();
             $this->_bootstrapped = true;
@@ -105,12 +97,5 @@ class Woo_Wompi_Payment
             $message = print_r($message, true);
         $logger = new WC_Logger();
         $logger->add('wompi-wwp', $message);
-    }
-
-    public function enqueue_scripts()
-    {
-        if(is_checkout()){
-            wp_enqueue_script( 'woo-wompi-payment', 'https://checkout.wompi.co/widget.js', array( 'jquery' ), false, true );
-        }
     }
 }
