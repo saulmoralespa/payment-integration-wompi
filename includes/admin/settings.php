@@ -3,9 +3,9 @@
 wc_enqueue_js( "
     jQuery( function( $ ) {
 	
-	let wompi_live_fields = '#woocommerce_wompi_wwp_public_key, #woocommerce_wompi_wwp_events_key';
+	let wompi_live_fields = '#woocommerce_wompi_wwp_public_key, #woocommerce_wompi_wwp_events_key, #woocommerce_wompi_wwp_integrity_secret';
 	
-	let wompi_sandbox_fields = '#woocommerce_wompi_wwp_sandbox_public_key, #woocommerce_wompi_wwp_sandbox_events_key';
+	let wompi_sandbox_fields = '#woocommerce_wompi_wwp_sandbox_public_key, #woocommerce_wompi_wwp_sandbox_events_key, #woocommerce_wompi_wwp_sandbox_integrity_secret';
 
 	$( '#woocommerce_wompi_wwp_environment' ).change(function(){
 
@@ -96,6 +96,12 @@ return apply_filters('payment_integration_wompi_settings',
             'description' => __( 'La llave de eventos del comercio para fines de pruebas' ),
             'desc_tip' => true
         ),
+        'sandbox_integrity_secret' => array(
+            'title' => __( 'Secreto Integridad' ),
+            'type'  => 'password',
+            'description' => __( 'El secreto para integridad del comercio para fines de pruebas' ),
+            'desc_tip' => true
+        ),
         'credentials' => array(
             'title'       => __( 'Credenciales de producción' ),
             'type'        => 'title'
@@ -111,7 +117,13 @@ return apply_filters('payment_integration_wompi_settings',
             'type'  => 'password',
             'description' => __( 'La llave de eventos del comercio para fines de producción' ),
             'desc_tip' => true
-        )
+        ),
+        'integrity_secret' => array(
+            'title' => __( 'Secreto Integridad' ),
+            'type'  => 'password',
+            'description' => __( 'El secreto para integridad del comercio para fines de producción' ),
+            'desc_tip' => true
+        ),
     )
 
 );

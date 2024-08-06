@@ -1,13 +1,15 @@
 <?php
 class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
 {
-    public $debug;
+    public string $debug;
 
-    public $isTest;
+    public bool $isTest;
 
-    public $public_key;
+    private string $public_key;
 
-    public $events_key;
+    private string $events_key;
+
+    private string $integrity_secret;
 
 
     public function __construct()
@@ -28,9 +30,11 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
         if ($this->isTest){
             $this->public_key = $this->get_option( 'sandbox_public_key' );
             $this->events_key = $this->get_option( 'sandbox_events_key' );
+            $this->integrity_secret = $this->get_option( 'sandbox_integrity_secret' );
         }else{
             $this->public_key = $this->get_option( 'public_key' );
             $this->events_key = $this->get_option( 'events_key' );
+            $this->integrity_secret = $this->get_option( 'integrity_secret' );
         }
 
         $this->init();
@@ -38,14 +42,14 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
         add_action('woocommerce_api_'.strtolower(get_class($this)), array($this, 'confirmation_ipn'));
     }
 
-    public function is_available()
+    public function is_available(): bool
     {
         return parent::is_available() &&
             !empty($this->public_key) &&
             !empty($this->events_key);
     }
 
-    public function init()
+    public function init(): void
     {
         // Load the settings API.
         $this->init_form_fields(); // This is part of the settings API. Override the method to add your own settings.
@@ -54,12 +58,12 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
     }
 
-    public function init_form_fields()
+    public function init_form_fields(): void
     {
         $this->form_fields = require( dirname( __FILE__ ) . '/admin/settings.php' );
     }
 
-    public function admin_options()
+    public function admin_options(): void
     {
         ?>
         <h3><?php echo $this->title; ?></h3>
@@ -70,18 +74,26 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
         <?php
     }
 
-    public function process_payment($order_id)
+    public function process_payment($order_id): array
     {
         $order = new WC_Order($order_id);
         $end_point = 'https://checkout.wompi.co/p/';
 
+        $amont_in_cents = bcmul($order->get_total(), 100);
+        $signature = "{$order_id}{$amont_in_cents}{$order->get_currency()}{$this->integrity_secret}";
+        $signature_integrity = hash('sha256', $signature);
+
         $params = [
             'public-key' => $this->public_key,
             'currency' => $order->get_currency(),
-            'amount-in-cents' => bcmul($order->get_total(), 100),
+            'amount-in-cents' => $amont_in_cents,
             'reference' => $order_id,
             'redirect-url' => $order->get_checkout_order_received_url()
         ];
+
+        if(!empty($this->integrity_secret)){
+            $params['signature:integrity'] = $signature_integrity;
+        }
 
         if ($this->debug === 'yes'){
             woo_wompi_payment_wwp()->log($params);
@@ -95,7 +107,7 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
         ];
     }
 
-    public function confirmation_ipn()
+    public function confirmation_ipn(): void
     {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
@@ -119,7 +131,7 @@ class WC_Payment_Wompi_WWP extends WC_Payment_Gateway
         if($data['signature']['checksum'] !== $checksum) return;
 
         $order_id = $data['data']['transaction']['reference'];
-        $order = new WC_Order($order_id);
+        $order = wc_get_order($order_id);
         $status = $data['data']['transaction']['status'];
 
         if ($status === 'APPROVED')

@@ -3,9 +3,9 @@ Contributors: saulmorales
 Donate link: https://saulmoralespa.com/donation
 Tags: commerce, e-commerce, commerce, WordPress ecommerce, store, sales, sell, shop, shopping, cart, checkout, configurable, wompi, nequi, pse, Colombia
 Requires at least: 6.0
-Tested up to: 6.4.2
-Requires PHP: 7.1
-Stable tag: 3.0.0
+Tested up to: 6.6.1
+Requires PHP: 8.0
+Stable tag: 4.0.1
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -56,9 +56,13 @@ Colombia
 = 3.0.0 =
 * Fixed validate and confirmation transaction
 * Updated compatibility with version 6.4
+= 4.0.0 =
+* Added compatibility with checkout blocks
+= 4.0.1 =
+* Fixed integrity secret required
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/woo-wompi-payment)
 
 == Credits ==
-*  [Saul Morales Pacheco](https://saulmoralespa.com)
+*  [Website](https://saulmoralespa.com) [Linkedin](https://www.linkedin.com/in/saulmoralespa/)

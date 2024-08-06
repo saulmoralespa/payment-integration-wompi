@@ -2,13 +2,14 @@
 /*
 Plugin Name: Payment Integration Wompi
 Description: Integration of Wompi for Woocommerce
-Version: 3.0.0
+Version: 4.0.1
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-WC tested up to: 8.0.3
+WC tested up to:  8.9.3
 WC requires at least: 4.0
+Requires Plugins: woocommerce
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if(!defined('WOO_WOMPI_PAYMENT_WWP_VERSION')){
-    define('WOO_WOMPI_PAYMENT_WWP_VERSION', '3.0.0');
+    define('WOO_WOMPI_PAYMENT_WWP_VERSION', '4.0.1');
 }
 
 add_action('plugins_loaded','woo_wompi_payment_wwp_init');
@@ -24,20 +25,26 @@ add_action(
     'before_woocommerce_init',
     function () {
         if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+                'cart_checkout_blocks',
+                __FILE__
+            );
         }
     }
 );
 
 
-function woo_wompi_payment_wwp_init(){
+function woo_wompi_payment_wwp_init(): void
+{
     if (!requeriments_woo_wompi_payment_wwp())
         return;
 
     woo_wompi_payment_wwp()->run_wompi();
 }
 
-function woo_wompi_payment_wwp_notices( $notice ) {
+function woo_wompi_payment_wwp_notices( $notice ): void
+{
     ?>
     <div class="error notice">
         <p><?php echo $notice; ?></p>
@@ -45,7 +52,8 @@ function woo_wompi_payment_wwp_notices( $notice ) {
     <?php
 }
 
-function requeriments_woo_wompi_payment_wwp(){
+function requeriments_woo_wompi_payment_wwp(): bool
+{
 
     if ( !in_array(
         'woocommerce/woocommerce.php',
